@@ -41,6 +41,10 @@ The ontology maps how macro signals cascade: Fed policy moves yields (strength 0
 <img width="973" height="616" alt="Screenshot 2026-02-27 at 4 18 24 PM" src="https://github.com/user-attachments/assets/ee5529a3-2277-4e6d-be93-ebaf818025a5" />
 
 ## Architecture
+<img width="941" height="793" alt="Screenshot 2026-02-27 at 4 25 37 PM" src="https://github.com/user-attachments/assets/15b5aad9-8ef4-488e-aec9-73ad3d9fa442" />
+
+<img width="904" height="399" alt="Screenshot 2026-02-27 at 4 25 53 PM" src="https://github.com/user-attachments/assets/82318e15-4d55-4f43-bcd9-956d47247554" />
+
 
 ```
 ┌─────────────────────────────────────────────────────────┐
