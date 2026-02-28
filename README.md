@@ -35,7 +35,8 @@ Claude Opus 4.6, Neo4j (causal ontology, 78 nodes, 120 relationships), FastAPI, 
 
 <img width="1322" height="591" alt="Screenshot 2026-02-27 at 4 18 00 PM" src="https://github.com/user-attachments/assets/ba4b2b32-6b5d-458d-a611-ecc9e2109e1f" />
 
-# Ontology results
+# Ontology results : 
+The ontology maps how macro signals cascade: Fed policy moves yields (strength 0.95), which shifts credit spreads (7d lag), which triggers DeFi outflows (3d). M2→BTC is the strongest direct channel (ρ=0.94, 90d). VIX>30 fires instant MEV liquidations.
 
 <img width="973" height="616" alt="Screenshot 2026-02-27 at 4 18 24 PM" src="https://github.com/user-attachments/assets/ee5529a3-2277-4e6d-be93-ebaf818025a5" />
 
