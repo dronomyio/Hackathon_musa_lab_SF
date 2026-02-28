@@ -4,7 +4,7 @@ Multi-vertical macro intelligence platform with 8 AI agents analyzing 127 FRED s
 
 ## The Problem
 
-Economic data is public, but economic understanding is not. The Federal Reserve publishes 800K+ time series covering yields, inflation, employment, housing, and trade — yet interpreting how these signals connect and cascade requires expertise concentrated in Wall Street institutions. A county treasurer managing bonds, a small business owner deciding whether to expand, a farmer hedging commodity exposure — all face the same complex macro environment but lack the analytical infrastructure to navigate it.
+Economic data is public (https://fred.stlouisfed.org), but economic understanding is not. The Federal Reserve publishes 800K+ time series covering yields, inflation, employment, housing, and trade — yet interpreting how these signals connect and cascade requires expertise concentrated in Wall Street institutions. A county treasurer managing bonds, a small business owner deciding whether to expand, a farmer hedging commodity exposure — all face the same complex macro environment but lack the analytical infrastructure to navigate it.
 
 ## What We Built
 
