@@ -1,0 +1,12 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY frontend/package.json ./
+RUN npm install --no-audit --no-fund && \
+    npm rebuild
+COPY frontend/ .
+
+EXPOSE 3000
+
+CMD ["npx", "vite", "--host", "0.0.0.0"]

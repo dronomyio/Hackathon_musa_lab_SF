@@ -1,0 +1,214 @@
+import React, { useMemo } from 'react'
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, Area, AreaChart, ScatterChart, Scatter, ZAxis } from 'recharts'
+import { alignSeries } from '../hooks/useFredData'
+import { shortDate, rollingCorrelation } from '../utils/chartHelpers'
+
+// ═══════════════════════════════════════════════════════════════════
+// SPREAD CHART (10Y-2Y)
+// ═══════════════════════════════════════════════════════════════════
+export function SpreadChart({ data }) {
+  const chartData = useMemo(() => {
+    const series = data?.T10Y2Y || []
+    return series.map(o => ({ date: o.date, spread: o.value }))
+  }, [data])
+
+  if (!chartData.length) return null
+
+  return (
+    <div className="card amber">
+      <div className="card-title">10Y − 2Y Spread (T10Y2Y)</div>
+      <div className="card-sub">Recession indicator · 0 bps = inversion threshold</div>
+      <ResponsiveContainer width="100%" height={320}>
+        <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <CartesianGrid stroke="rgba(42,63,102,0.5)" strokeWidth={0.5} />
+          <XAxis dataKey="date" tickFormatter={shortDate} tick={{ fill: '#a3b1c6', fontSize: 10, fontFamily: "'JetBrains Mono'" }} interval={Math.floor(chartData.length / 8)} />
+          <YAxis tickFormatter={v => `${v.toFixed(2)}%`} tick={{ fill: '#a3b1c6', fontSize: 10, fontFamily: "'JetBrains Mono'" }} />
+          <ReferenceLine y={0} stroke="#ef4444" strokeWidth={2} strokeDasharray="6 4" label={{ value: 'INVERSION', position: 'insideTopLeft', fill: '#ef4444', fontSize: 9, fontFamily: "'JetBrains Mono'" }} />
+          <Tooltip contentStyle={{ background: '#1a2744', border: '1px solid #3b82f6', borderRadius: 8, fontFamily: "'JetBrains Mono'", fontSize: 12, color: '#e2e8f4', padding: '10px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }} labelStyle={{ color: '#e2e8f4' }} itemStyle={{ color: '#e2e8f4' }}
+            formatter={v => [`${v.toFixed(2)}%${v < 0 ? ' ⚠ INVERTED' : ''}`, 'Spread']} labelFormatter={shortDate} />
+          <Area type="monotone" dataKey="spread" stroke="#f59e0b" fill="rgba(245,158,11,0.06)" strokeWidth={2} dot={false} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CURVE SNAPSHOT
+// ═══════════════════════════════════════════════════════════════════
+export function CurveSnapshot({ curveData }) {
+  const chartData = useMemo(() => {
+    if (!curveData?.maturities) return []
+    return curveData.maturities.map((m, i) => {
+      const sid = curveData.series_ids[i]
+      return { maturity: m, current: curveData.current?.[sid], prev30d: curveData.prev_30d?.[sid] }
+    })
+  }, [curveData])
+
+  if (!chartData.length) return <div className="card"><div className="card-title">Yield Curve Snapshot</div><div className="card-sub">Loading…</div></div>
+
+  return (
+    <div className="card">
+      <div className="card-title">Yield Curve Snapshot — Latest</div>
+      <div className="card-sub">Full spectrum 1M → 30Y vs ~30 trading days ago</div>
+      <ResponsiveContainer width="100%" height={320}>
+        <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <CartesianGrid stroke="rgba(42,63,102,0.5)" strokeWidth={0.5} />
+          <XAxis dataKey="maturity" tick={{ fill: '#a3b1c6', fontSize: 10, fontFamily: "'JetBrains Mono'" }} />
+          <YAxis tickFormatter={v => `${v?.toFixed(1)}%`} tick={{ fill: '#a3b1c6', fontSize: 10, fontFamily: "'JetBrains Mono'" }} domain={['auto', 'auto']} />
+          <Tooltip contentStyle={{ background: '#1a2744', border: '1px solid #3b82f6', borderRadius: 8, fontFamily: "'JetBrains Mono'", fontSize: 12, color: '#e2e8f4', padding: '10px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }} labelStyle={{ color: '#e2e8f4' }} itemStyle={{ color: '#e2e8f4' }}
+            formatter={(v, name) => [v ? `${v.toFixed(2)}%` : 'N/A', name === 'current' ? 'Today' : '~30d Ago']} />
+          <Line type="monotone" dataKey="current" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6', stroke: '#111a2e', strokeWidth: 2 }} />
+          <Line type="monotone" dataKey="prev30d" stroke="rgba(74,88,114,0.5)" strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 3, fill: 'rgba(74,88,114,0.5)' }} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAIL CHART (20Y, 30Y, 30Y-10Y spread)
+// ═══════════════════════════════════════════════════════════════════
+export function TailChart({ data }) {
+  const chartData = useMemo(() => {
+    const aligned = alignSeries(data, 'DGS10', 'DGS20', 'DGS30')
+    if (!aligned) return []
+    return aligned.dates.map((d, i) => ({
+      date: d,
+      y20: aligned.DGS20[i],
+      y30: aligned.DGS30[i],
+      spread: +(aligned.DGS30[i] - aligned.DGS10[i]).toFixed(3),
+    }))
+  }, [data])
+
+  if (!chartData.length) return null
+
+  return (
+    <div className="card">
+      <div className="card-title">Tail End: 20Y & 30Y Long Bond</div>
+      <div className="card-sub">Long-duration risk · 30Y−10Y term premium</div>
+      <div className="legend-row">
+        <div className="legend-item"><div className="legend-dot" style={{ background: 'var(--corg)' }} />20Y</div>
+        <div className="legend-item"><div className="legend-dot" style={{ background: 'var(--c30y)' }} />30Y</div>
+        <div className="legend-item"><div className="legend-dot" style={{ background: 'var(--crose)' }} />30Y−10Y</div>
+      </div>
+      <ResponsiveContainer width="100%" height={320}>
+        <LineChart data={chartData} margin={{ top: 5, right: 50, left: 0, bottom: 5 }}>
+          <CartesianGrid stroke="rgba(42,63,102,0.5)" strokeWidth={0.5} />
+          <XAxis dataKey="date" tickFormatter={shortDate} tick={{ fill: '#a3b1c6', fontSize: 10, fontFamily: "'JetBrains Mono'" }} interval={Math.floor(chartData.length / 8)} />
+          <YAxis yAxisId="left" tickFormatter={v => `${v.toFixed(1)}%`} tick={{ fill: '#a3b1c6', fontSize: 10, fontFamily: "'JetBrains Mono'" }} />
+          <YAxis yAxisId="right" orientation="right" tickFormatter={v => `${v.toFixed(2)}%`} tick={{ fill: 'rgba(244,63,94,0.5)', fontSize: 10, fontFamily: "'JetBrains Mono'" }} />
+          <Tooltip contentStyle={{ background: '#1a2744', border: '1px solid #3b82f6', borderRadius: 8, fontFamily: "'JetBrains Mono'", fontSize: 12, color: '#e2e8f4', padding: '10px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }} labelStyle={{ color: '#e2e8f4' }} itemStyle={{ color: '#e2e8f4' }}
+            formatter={(v, name) => [`${v.toFixed(2)}%`, name === 'y20' ? '20Y' : name === 'y30' ? '30Y' : '30Y-10Y']} labelFormatter={shortDate} />
+          <Line yAxisId="left" type="monotone" dataKey="y20" stroke="#f97316" strokeWidth={1.8} dot={false} />
+          <Line yAxisId="left" type="monotone" dataKey="y30" stroke="#a78bfa" strokeWidth={2} dot={false} />
+          <Line yAxisId="right" type="monotone" dataKey="spread" stroke="rgba(244,63,94,0.8)" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CROSS-CORRELATION
+// ═══════════════════════════════════════════════════════════════════
+export function CrossCorrelation({ data, agentResult }) {
+  const chartData = useMemo(() => {
+    // Use agent's pre-computed correlation series if available
+    if (agentResult?.details?.correlation_series && agentResult?.details?.correlation_dates) {
+      return agentResult.details.correlation_dates.map((d, i) => ({
+        date: d, corr: agentResult.details.correlation_series[i],
+      }))
+    }
+    // Fallback: compute in frontend
+    const aligned = alignSeries(data, 'DGS2', 'DGS10')
+    if (!aligned) return []
+    const corrs = rollingCorrelation(aligned.DGS2, aligned.DGS10, 30)
+    const offset = aligned.dates.length - corrs.length
+    return corrs.map((c, i) => ({ date: aligned.dates[i + offset] || '', corr: +c.toFixed(3) }))
+  }, [data, agentResult])
+
+  if (!chartData.length) return null
+
+  return (
+    <div className="card violet">
+      <div className="card-title">Cross-Correlation: Δ2Y vs Δ10Y</div>
+      <div className="card-sub">Rolling 30-day Pearson on daily yield changes</div>
+      <ResponsiveContainer width="100%" height={320}>
+        <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <CartesianGrid stroke="rgba(42,63,102,0.5)" strokeWidth={0.5} />
+          <XAxis dataKey="date" tickFormatter={shortDate} tick={{ fill: '#a3b1c6', fontSize: 10, fontFamily: "'JetBrains Mono'" }} interval={Math.floor(chartData.length / 8)} />
+          <YAxis domain={[-1, 1]} tickFormatter={v => v.toFixed(1)} tick={{ fill: '#a3b1c6', fontSize: 10, fontFamily: "'JetBrains Mono'" }} />
+          <ReferenceLine y={0.7} stroke="rgba(16,185,129,0.25)" strokeDasharray="4 4" label={{ value: 'Sync', position: 'insideRight', fill: 'rgba(16,185,129,0.7)', fontSize: 8, fontFamily: "'JetBrains Mono'" }} />
+          <ReferenceLine y={0.3} stroke="rgba(239,68,68,0.25)" strokeDasharray="4 4" label={{ value: 'Diverge', position: 'insideRight', fill: 'rgba(239,68,68,0.7)', fontSize: 8, fontFamily: "'JetBrains Mono'" }} />
+          <ReferenceLine y={0} stroke="rgba(74,88,114,0.2)" />
+          <Tooltip contentStyle={{ background: '#1a2744', border: '1px solid #3b82f6', borderRadius: 8, fontFamily: "'JetBrains Mono'", fontSize: 12, color: '#e2e8f4', padding: '10px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }} labelStyle={{ color: '#e2e8f4' }} itemStyle={{ color: '#e2e8f4' }}
+            formatter={v => {
+              const r = v > 0.7 ? '🟢 Sync' : v < 0.3 ? '🔴 Diverge' : '🟡 Transit'
+              return [`ρ = ${v.toFixed(3)} · ${r}`, 'Correlation']
+            }} labelFormatter={shortDate} />
+          <Area type="monotone" dataKey="corr" stroke="#8b5cf6" fill="rgba(139,92,246,0.06)" strokeWidth={2} dot={false} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SCATTER PLOT (2Y vs 10Y)
+// ═══════════════════════════════════════════════════════════════════
+export function ScatterPlot({ data }) {
+  const { older, recent, domain } = useMemo(() => {
+    const aligned = alignSeries(data, 'DGS2', 'DGS10')
+    if (!aligned) return { older: [], recent: [], domain: [3, 5] }
+
+    const pts = aligned.dates.map((d, i) => ({ x: aligned.DGS2[i], y: aligned.DGS10[i], date: d }))
+    const cutoff = Math.max(0, pts.length - 80)
+    const allV = [...pts.map(p => p.x), ...pts.map(p => p.y)]
+    const mn = Math.min(...allV) - 0.2
+    const mx = Math.max(...allV) + 0.2
+
+    return {
+      older: pts.slice(0, cutoff),
+      recent: pts.slice(cutoff),
+      domain: [mn, mx],
+    }
+  }, [data])
+
+  if (!older.length && !recent.length) return null
+
+  // Parity line data (2Y = 10Y)
+  const parityLine = [{ x: domain[0], y: domain[0] }, { x: domain[1], y: domain[1] }]
+
+  return (
+    <div className="card violet">
+      <div className="card-title">2Y vs 10Y Scatter · Regime Map</div>
+      <div className="card-sub">Each dot = 1 trading day · Red = inverted · Blue = normal · Diagonal = parity</div>
+      <ResponsiveContainer width="100%" height={400}>
+        <ScatterChart margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+          <CartesianGrid stroke="rgba(42,63,102,0.5)" strokeWidth={0.5} />
+          <XAxis type="number" dataKey="x" domain={domain} tickFormatter={v => `${v.toFixed(1)}%`}
+            tick={{ fill: '#a3b1c6', fontSize: 11, fontFamily: "'JetBrains Mono'" }}
+            label={{ value: '2Y Yield %', position: 'insideBottom', offset: -5, fill: '#22d3ee', fontSize: 12, fontWeight: 600, fontFamily: "'JetBrains Mono'" }} />
+          <YAxis type="number" dataKey="y" domain={domain} tickFormatter={v => `${v.toFixed(1)}%`}
+            tick={{ fill: '#a3b1c6', fontSize: 11, fontFamily: "'JetBrains Mono'" }}
+            label={{ value: '10Y Yield %', angle: -90, position: 'insideLeft', fill: '#3b82f6', fontSize: 12, fontWeight: 600, fontFamily: "'JetBrains Mono'" }} />
+          <ZAxis range={[30, 30]} />
+          <Tooltip contentStyle={{ background: '#1a2744', border: '1px solid #3b82f6', borderRadius: 8, fontFamily: "'JetBrains Mono'", fontSize: 12, color: '#e2e8f4', padding: '10px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}
+            labelStyle={{ color: '#e2e8f4', fontWeight: 600 }}
+            itemStyle={{ color: '#e2e8f4' }}
+            formatter={(v, name, props) => {
+              const p = props.payload
+              return name === 'x' ? [`2Y: ${p.x.toFixed(2)}%  |  10Y: ${p.y.toFixed(2)}%  |  Spread: ${(p.y - p.x).toFixed(2)}%`, p.date] : null
+            }} />
+          <Scatter name="Older" data={older} fill="rgba(59,130,246,0.3)" />
+          <Scatter name="Recent 80d" data={recent} fill="rgba(34,211,238,0.9)" />
+          {/* Parity reference */}
+          <Scatter data={parityLine} fill="none" line={{ stroke: 'rgba(239,68,68,0.6)', strokeWidth: 2.5, strokeDasharray: '8 4' }} />
+        </ScatterChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+export default { SpreadChart, CurveSnapshot, TailChart, CrossCorrelation, ScatterPlot }

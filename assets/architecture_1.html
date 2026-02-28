@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macro Intelligence Platform — Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #04080e;
+  --bg1: #0a1018;
+  --bg2: #0f1822;
+  --bg3: #162030;
+  --bdr: #1a2a42;
+  --t1: #e4eaf6;
+  --t2: #8898b6;
+  --t3: #4a5e7e;
+  --cyan: #22d3ee;
+  --blue: #3b82f6;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --violet: #8b5cf6;
+  --pink: #ec4899;
+  --lime: #84cc16;
+  --orange: #f97316;
+  --teal: #14b8a6;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--t1);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 800px 600px at 20% 10%, rgba(34,211,238,.04), transparent),
+    radial-gradient(ellipse 600px 400px at 80% 80%, rgba(139,92,246,.03), transparent),
+    radial-gradient(ellipse 400px 300px at 50% 50%, rgba(16,185,129,.02), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.page-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.page-header h1 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--cyan), var(--blue), var(--violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.page-header .subtitle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--t3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ═══ SECTION TITLES ═══ */
+.section-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--bdr), transparent);
+}
+
+/* ═══ NODE SYSTEM ═══ */
+.node {
+  background: var(--bg2);
+  border: 1px solid var(--bdr);
+  border-radius: 12px;
+  padding: 16px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.2s;
+}
+.node:hover {
+  border-color: var(--blue);
+  transform: translateY(-2px);
+}
+.node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  opacity: 0.6;
+}
+.node-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.node-title {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+.node-desc {
+  font-size: 12px;
+  color: var(--t2);
+  line-height: 1.5;
+}
+.node-tech {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--t3);
+  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.node-tech span {
+  background: rgba(255,255,255,.04);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+/* ═══ CONNECTOR ARROWS ═══ */
+.connector-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 0;
+  position: relative;
+}
+.connector-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.connector-line {
+  width: 2px;
+  height: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.connector-line::before {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  animation: flowDown 1.5s ease-in-out infinite;
+}
+@keyframes flowDown {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+.connector-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 10px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.connector-chevron {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ═══ LAYER 1: DATA SOURCE ═══ */
+.layer-data {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 0;
+}
+.data-node::before { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
+.data-node .node-label { color: var(--cyan); }
+
+/* ═══ LAYER 2: BACKEND ENGINE ═══ */
+.layer-engine {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 0;
+}
+.engine-inner {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 16px;
+  align-items: start;
+}
+.engine-node { border-color: var(--blue); }
+.engine-node::before { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+.engine-node .node-label { color: var(--blue); }
+
+/* Agent grid */
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.agent-card {
+  background: var(--bg3);
+  border: 1px solid var(--bdr);
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+.agent-card:hover {
+  transform: translateY(-2px);
+}
+.agent-icon { font-size: 18px; margin-bottom: 4px; }
+.agent-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.agent-series {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: var(--t3);
+  margin-top: 2px;
+}
+
+/* ═══ LAYER 3: PROMPT LIFECYCLE ═══ */
+.lifecycle-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.lifecycle-stage {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+  text-align: center;
+  min-width: 120px;
+  position: relative;
+}
+.lifecycle-arrow {
+  font-size: 18px;
+  padding: 0 6px;
+  opacity: 0.4;
+}
+.lifecycle-sub {
+  font-size: 8px;
+  font-weight: 400;
+  opacity: 0.6;
+  margin-top: 2px;
+  display: block;
+}
+
+/* ═══ LAYER 4: VERTICALS ═══ */
+.verticals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.vertical-card {
+  background: var(--bg2);
+  border: 1px solid var(--bdr);
+  border-radius: 10px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.3s;
+}
+.vertical-card:hover {
+  transform: translateY(-3px);
+}
+.vertical-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+.vertical-icon { font-size: 22px; margin-bottom: 6px; }
+.vertical-name {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+.vertical-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--t3);
+}
+.vertical-series {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  margin-top: 6px;
+  color: var(--t2);
+  line-height: 1.5;
+}
+.vertical-customers {
+  font-size: 10px;
+  color: var(--t3);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* ═══ LAYER 5: OUTPUT ═══ */
+.output-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.output-node {
+  background: var(--bg2);
+  border: 1px solid var(--bdr);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+.output-node:hover { transform: translateY(-2px); }
+.output-icon { font-size: 24px; margin-bottom: 6px; }
+.output-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+.output-desc {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--t3);
+}
+
+/* ═══ LAYER 6: DEPLOY ═══ */
+.deploy-flow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.deploy-node { text-align: center; }
+.deploy-node::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+.deploy-node .node-label { color: var(--green); }
+
+/* ═══ HORIZONTAL CONNECTOR ═══ */
+.h-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+}
+.h-connector .h-line {
+  width: 32px;
+  height: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.h-connector .h-line::before {
+  content: '';
+  position: absolute;
+  left: -100%;
+  top: 0;
+  width: 100%;
+  height: 2px;
+  animation: flowRight 1.2s ease-in-out infinite;
+}
+@keyframes flowRight {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* ═══ MULTI-CONNECTOR ═══ */
+.fan-out {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 40px;
+  position: relative;
+  margin-bottom: 12px;
+}
+.fan-out svg {
+  width: 100%;
+  height: 40px;
+}
+.fan-out path {
+  fill: none;
+  stroke-width: 1.5;
+  opacity: 0.4;
+}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate { animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+.d1 { animation-delay: 0.1s; }
+.d2 { animation-delay: 0.2s; }
+.d3 { animation-delay: 0.3s; }
+.d4 { animation-delay: 0.4s; }
+.d5 { animation-delay: 0.5s; }
+.d6 { animation-delay: 0.6s; }
+.d7 { animation-delay: 0.7s; }
+.d8 { animation-delay: 0.8s; }
+.d9 { animation-delay: 0.9s; }
+
+/* Pulse on data nodes */
+@keyframes dataPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,211,238,0.1); }
+  50% { box-shadow: 0 0 20px 4px rgba(34,211,238,0.08); }
+}
+.data-node { animation: dataPulse 3s ease-in-out infinite; }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .engine-inner { grid-template-columns: 1fr; }
+  .agent-grid { grid-template-columns: repeat(4, 1fr); }
+  .verticals-grid { grid-template-columns: repeat(2, 1fr); }
+  .output-grid { grid-template-columns: repeat(2, 1fr); }
+  .deploy-flow { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .layer-data { grid-template-columns: 1fr; }
+  .agent-grid { grid-template-columns: repeat(2, 1fr); }
+  .verticals-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══ TOTAL COUNTER ═══ */
+.total-strip {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin: 32px 0 12px;
+  flex-wrap: wrap;
+}
+.total-item {
+  text-align: center;
+}
+.total-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 32px;
+  font-weight: 700;
+}
+.total-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+
+/* ═══ LEGEND ═══ */
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--t3);
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+/* ═══ WATERMARK ═══ */
+.watermark {
+  text-align: center;
+  margin-top: 48px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--t3);
+  opacity: 0.4;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="page-header animate d1">
+    <h1>Macro Intelligence Platform</h1>
+    <div class="subtitle">System Architecture · Data Flow · Connector Map</div>
+  </div>
+
+  <!-- Totals -->
+  <div class="total-strip animate d1">
+    <div class="total-item">
+      <div class="total-num" style="color: var(--cyan)">127</div>
+      <div class="total-label">FRED Series</div>
+    </div>
+    <div class="total-item">
+      <div class="total-num" style="color: var(--blue)">8</div>
+      <div class="total-label">Verticals</div>
+    </div>
+    <div class="total-item">
+      <div class="total-num" style="color: var(--green)">8</div>
+      <div class="total-label">AI Agents</div>
+    </div>
+    <div class="total-item">
+      <div class="total-num" style="color: var(--violet)">∞</div>
+      <div class="total-label">Curated Prompts</div>
+    </div>
+    <div class="total-item">
+      <div class="total-num" style="color: var(--amber)">15</div>
+      <div class="total-label">Min Cycle</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ LAYER 1: DATA SOURCES ═══ -->
+  <div class="section-title animate d2">Layer 1 · Data Ingestion</div>
+
+  <div class="layer-data animate d2">
+    <div class="node data-node">
+      <div class="node-label">Primary Source</div>
+      <div class="node-title">🏛️ FRED API</div>
+      <div class="node-desc">Federal Reserve Economic Data — 800,000+ series. We pull 127 across 13 categories.</div>
+      <div class="node-tech">
+        <span>REST API</span>
+        <span>JSON</span>
+        <span>api.stlouisfed.org</span>
+      </div>
+    </div>
+    <div class="node data-node">
+      <div class="node-label">Cache Layer</div>
+      <div class="node-title">⚡ FREDClient</div>
+      <div class="node-desc">Async fetcher with TTL cache (15 min). Deduplicates across verticals. Handles rate limits.</div>
+      <div class="node-tech">
+        <span>httpx</span>
+        <span>asyncio</span>
+        <span>TTL=900s</span>
+      </div>
+    </div>
+    <div class="node data-node">
+      <div class="node-label">Series Registry</div>
+      <div class="node-title">📋 series_config.py</div>
+      <div class="node-desc">49 DeFi series + 78 vertical series. Grouped by: yield curve, credit, inflation, liquidity, dollar, employment, housing, trade, agriculture.</div>
+      <div class="node-tech">
+        <span>49 DeFi</span>
+        <span>78 Vertical</span>
+        <span>13 Categories</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connector: Data → Engine -->
+  <div class="connector-row animate d3">
+    <div class="connector-arrow">
+      <div class="connector-line" style="background: var(--bg3);">
+        <div style="background: linear-gradient(180deg, var(--cyan), transparent);"></div>
+      </div>
+      <div class="connector-label" style="color: var(--cyan); border-color: rgba(34,211,238,0.3); background: rgba(34,211,238,0.05);">
+        127 series → every 15 min
+      </div>
+      <div class="connector-chevron" style="color: var(--cyan);">▼</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ LAYER 2: ENGINE ═══ -->
+  <div class="section-title animate d3">Layer 2 · Processing Engine</div>
+
+  <div class="engine-inner animate d3">
+    <!-- Left: Agent Loop -->
+    <div class="node engine-node">
+      <div class="node-label">Scheduler</div>
+      <div class="node-title">🔄 AgentLoop</div>
+      <div class="node-desc">Autonomous loop every 15 min. Fetches data, runs all 8 agents, calls Opus 4.6, broadcasts via WebSocket.</div>
+      <div class="node-tech">
+        <span>asyncio.Task</span>
+        <span>15min interval</span>
+        <span>auto-recovery</span>
+      </div>
+    </div>
+
+    <!-- Center: 8 Agents -->
+    <div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--blue); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; text-align: center;">
+        8 Specialist Agents (Pure Math, No LLM)
+      </div>
+      <div class="agent-grid">
+        <div class="agent-card" style="border-color: rgba(59,130,246,0.3);">
+          <div class="agent-icon">📈</div>
+          <div class="agent-name" style="color: var(--blue);">Yield Curve</div>
+          <div class="agent-series">10Y-2Y, shape, recession prob</div>
+        </div>
+        <div class="agent-card" style="border-color: rgba(245,158,11,0.3);">
+          <div class="agent-icon">💳</div>
+          <div class="agent-name" style="color: var(--amber);">Credit Risk</div>
+          <div class="agent-series">Aaa/Baa, HY OAS, IG OAS</div>
+        </div>
+        <div class="agent-card" style="border-color: rgba(239,68,68,0.3);">
+          <div class="agent-icon">🔥</div>
+          <div class="agent-name" style="color: var(--red);">Inflation</div>
+          <div class="agent-series">Breakevens, TIPS, CPI, PCE</div>
+        </div>
+        <div class="agent-card" style="border-color: rgba(139,92,246,0.3);">
+          <div class="agent-icon">⚠️</div>
+          <div class="agent-name" style="color: var(--violet);">Tail Risk</div>
+          <div class="agent-series">20Y/30Y, term premium</div>
+        </div>
+        <div class="agent-card" style="border-color: rgba(20,184,166,0.3);">
+          <div class="agent-icon">🔗</div>
+          <div class="agent-name" style="color: var(--teal);">Cross-Corr</div>
+          <div class="agent-series">Rolling ρ, divergence</div>
+        </div>
+        <div class="agent-card" style="border-color: rgba(34,211,238,0.3);">
+          <div class="agent-icon">💧</div>
+          <div class="agent-name" style="color: var(--cyan);">Liquidity</div>
+          <div class="agent-series">M2, Fed BS, RRP, TGA</div>
+        </div>
+        <div class="agent-card" style="border-color: rgba(16,185,129,0.3);">
+          <div class="agent-icon">💵</div>
+          <div class="agent-name" style="color: var(--green);">Dollar & Vol</div>
+          <div class="agent-series">DXY, VIX, TED, S&P, EUR</div>
+        </div>
+        <div class="agent-card" style="border-color: rgba(236,72,153,0.3);">
+          <div class="agent-icon">👷</div>
+          <div class="agent-name" style="color: var(--pink);">Employment</div>
+          <div class="agent-series">Claims, NFCI, STLFSI</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Orchestrator -->
+    <div class="node engine-node" style="border-color: rgba(139,92,246,0.4);">
+      <div class="node-label" style="color: var(--violet);">Synthesizer</div>
+      <div class="node-title">🧠 Opus 4.6</div>
+      <div class="node-desc">8 agent signals → unified regime assessment. Uses curated system prompt from lifecycle.</div>
+      <div class="node-tech">
+        <span>claude-opus-4-6</span>
+        <span>3K tokens</span>
+        <span>JSON schema</span>
+      </div>
+      <div style="margin-top: 10px; padding: 8px; background: rgba(139,92,246,0.08); border-radius: 6px; border: 1px solid rgba(139,92,246,0.15);">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--violet); letter-spacing: 1px;">OUTPUT →</div>
+        <div style="font-size: 10px; color: var(--t2); margin-top: 4px; line-height: 1.4;">
+          regime · confidence · narrative · DeFi implications · macro→crypto transmission · risks
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connector: Engine → Prompt Lifecycle -->
+  <div class="connector-row animate d4">
+    <div class="connector-arrow">
+      <div class="connector-line" style="background: var(--bg3);">
+        <div style="background: linear-gradient(180deg, var(--violet), transparent);"></div>
+      </div>
+      <div class="connector-label" style="color: var(--violet); border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.05);">
+        reads system prompt ↑↓ logs performance
+      </div>
+      <div class="connector-chevron" style="color: var(--violet);">⇅</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ LAYER 3: PROMPT LIFECYCLE ═══ -->
+  <div class="section-title animate d4">Layer 3 · Prompt Lifecycle (Human-in-the-Loop)</div>
+
+  <div class="node animate d4" style="border-color: rgba(139,92,246,0.3); padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <div>
+        <div class="node-label" style="color: var(--violet);">Knowledge Asset</div>
+        <div class="node-title">📝 prompt_library.json</div>
+      </div>
+      <div class="node-tech">
+        <span>Docker volume</span>
+        <span>Versioned</span>
+        <span>Per-vertical</span>
+      </div>
+    </div>
+    <div class="lifecycle-flow">
+      <div class="lifecycle-stage" style="color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.06);">
+        BOOTSTRAP
+        <span class="lifecycle-sub">Opus writes prompt</span>
+      </div>
+      <div class="lifecycle-arrow" style="color: var(--t3);">→</div>
+      <div class="lifecycle-stage" style="color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.06);">
+        DRAFT
+        <span class="lifecycle-sub">Auto-generated, usable</span>
+      </div>
+      <div class="lifecycle-arrow" style="color: var(--t3);">→</div>
+      <div class="lifecycle-stage" style="color: var(--blue); border-color: rgba(59,130,246,0.4); background: rgba(59,130,246,0.06);">
+        EVOLVING
+        <span class="lifecycle-sub">20+ runs, conf > 0.6</span>
+      </div>
+      <div class="lifecycle-arrow" style="color: var(--t3);">→</div>
+      <div class="lifecycle-stage" style="color: var(--green); border-color: rgba(16,185,129,0.5); background: rgba(16,185,129,0.08); box-shadow: 0 0 12px rgba(16,185,129,0.1);">
+        ✓ CURATED
+        <span class="lifecycle-sub">Human approved</span>
+      </div>
+      <div class="lifecycle-arrow" style="color: var(--t3);">⟲</div>
+      <div class="lifecycle-stage" style="color: var(--violet); border-color: rgba(139,92,246,0.4); background: rgba(139,92,246,0.06);">
+        🧠 SELF-IMPROVE
+        <span class="lifecycle-sub">Opus suggests edits</span>
+      </div>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 24px; margin-top: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--t3);">
+      <span>👁️ Human reviews in dashboard</span>
+      <span>·</span>
+      <span>✏️ Edits in-browser</span>
+      <span>·</span>
+      <span>🔄 Rollback to any version</span>
+      <span>·</span>
+      <span>📊 Performance tracked</span>
+    </div>
+  </div>
+
+  <!-- Connector: Lifecycle → Verticals -->
+  <div class="connector-row animate d5">
+    <div class="connector-arrow">
+      <div class="connector-line" style="background: var(--bg3);">
+        <div style="background: linear-gradient(180deg, var(--green), transparent);"></div>
+      </div>
+      <div class="connector-label" style="color: var(--green); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05);">
+        each vertical has its own curated prompt
+      </div>
+      <div class="connector-chevron" style="color: var(--green);">▼</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ LAYER 4: VERTICALS ═══ -->
+  <div class="section-title animate d5">Layer 4 · 8 Verticals (Same Engine, Different Prompt)</div>
+
+  <div class="verticals-grid animate d5">
+    <!-- 1 DeFi -->
+    <div class="vertical-card" style="border-color: rgba(34,211,238,0.4);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);"></div>
+      <div class="vertical-icon">⚡</div>
+      <div class="vertical-name" style="color: var(--cyan);">DeFi & Crypto</div>
+      <div class="vertical-meta">49 SERIES · 8 AGENTS · PRIMARY</div>
+      <div class="vertical-series">M2→BTC ρ=0.94 · VIX→MEV · USD→BTC inverse</div>
+      <div class="vertical-customers">→ Crypto funds, DeFi protocols, MEV researchers</div>
+    </div>
+    <!-- 2 Fiscal -->
+    <div class="vertical-card" style="border-color: rgba(16,185,129,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);"></div>
+      <div class="vertical-icon">🏛️</div>
+      <div class="vertical-name" style="color: var(--green);">County GDP & Fiscal</div>
+      <div class="vertical-meta">12 SERIES · 5 CHARTS</div>
+      <div class="vertical-series">Debt/GDP · Spending vs Revenue · Deficit</div>
+      <div class="vertical-customers">→ State treasurers, muni bond analysts, GFOA</div>
+    </div>
+    <!-- 3 Housing -->
+    <div class="vertical-card" style="border-color: rgba(245,158,11,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--amber),transparent);"></div>
+      <div class="vertical-icon">🏠</div>
+      <div class="vertical-name" style="color: var(--amber);">Housing & Real Estate</div>
+      <div class="vertical-meta">12 SERIES · 5 CHARTS</div>
+      <div class="vertical-series">Case-Shiller · Mortgage rates · Starts · Supply</div>
+      <div class="vertical-customers">→ REITs, mortgage lenders, FHFA</div>
+    </div>
+    <!-- 4 Small Business -->
+    <div class="vertical-card" style="border-color: rgba(236,72,153,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--pink),transparent);"></div>
+      <div class="vertical-icon">🏪</div>
+      <div class="vertical-name" style="color: var(--pink);">Small Business</div>
+      <div class="vertical-meta">12 SERIES · 5 CHARTS</div>
+      <div class="vertical-series">Sentiment · Credit · Retail · Delinquencies</div>
+      <div class="vertical-customers">→ SBA, fintech lenders, chambers</div>
+    </div>
+    <!-- 5 Agriculture -->
+    <div class="vertical-card" style="border-color: rgba(132,204,22,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--lime),transparent);"></div>
+      <div class="vertical-icon">🌾</div>
+      <div class="vertical-name" style="color: var(--lime);">Agriculture & Commodities</div>
+      <div class="vertical-meta">11 SERIES · 5 CHARTS</div>
+      <div class="vertical-series">WTI · Gold · Food CPI · PPI · Gas</div>
+      <div class="vertical-customers">→ Ag lenders, commodity traders, USDA</div>
+    </div>
+    <!-- 6 Inflation -->
+    <div class="vertical-card" style="border-color: rgba(249,115,22,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);"></div>
+      <div class="vertical-icon">💰</div>
+      <div class="vertical-name" style="color: var(--orange);">Inflation Impact</div>
+      <div class="vertical-meta">12 SERIES · 5 CHARTS</div>
+      <div class="vertical-series">CPI components · Shelter · Food · Wages</div>
+      <div class="vertical-customers">→ Think tanks, Congress, media</div>
+    </div>
+    <!-- 7 Trade -->
+    <div class="vertical-card" style="border-color: rgba(20,184,166,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--teal),transparent);"></div>
+      <div class="vertical-icon">🚢</div>
+      <div class="vertical-name" style="color: var(--teal);">Trade & Supply Chain</div>
+      <div class="vertical-meta">12 SERIES · 5 CHARTS</div>
+      <div class="vertical-series">Trade balance · Mfg · FX · Capacity</div>
+      <div class="vertical-customers">→ Supply chain teams, USTR, NAM</div>
+    </div>
+    <!-- 8 Labor -->
+    <div class="vertical-card" style="border-color: rgba(139,92,246,0.3);">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--violet),transparent);"></div>
+      <div class="vertical-icon">👷</div>
+      <div class="vertical-name" style="color: var(--violet);">Labor Market</div>
+      <div class="vertical-meta">12 SERIES · 5 CHARTS</div>
+      <div class="vertical-series">JOLTS · Claims · Wages · Demographics</div>
+      <div class="vertical-customers">→ Employers, staffing, HR tech, BLS</div>
+    </div>
+  </div>
+
+  <!-- Connector: Verticals → Outputs -->
+  <div class="connector-row animate d6">
+    <div class="connector-arrow">
+      <div class="connector-line" style="background: var(--bg3);">
+        <div style="background: linear-gradient(180deg, var(--amber), transparent);"></div>
+      </div>
+      <div class="connector-label" style="color: var(--amber); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05);">
+        regime + narrative + charts → 4 output channels
+      </div>
+      <div class="connector-chevron" style="color: var(--amber);">▼</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ LAYER 5: OUTPUT CHANNELS ═══ -->
+  <div class="section-title animate d6">Layer 5 · Output Channels</div>
+
+  <div class="output-grid animate d6">
+    <div class="output-node" style="border-color: rgba(34,211,238,0.3);">
+      <div class="output-icon">🖥️</div>
+      <div class="output-name">Dashboard</div>
+      <div class="output-desc">React + Recharts<br>Tabbed verticals<br>KPIs, charts, AI panel<br>Port 3000</div>
+    </div>
+    <div class="output-node" style="border-color: rgba(59,130,246,0.3);">
+      <div class="output-icon">🔌</div>
+      <div class="output-name">REST API</div>
+      <div class="output-desc">FastAPI<br>/api/agents/latest<br>/api/v/{id}/analysis<br>Port 8000 · CORS *</div>
+    </div>
+    <div class="output-node" style="border-color: rgba(16,185,129,0.3);">
+      <div class="output-icon">⚡</div>
+      <div class="output-name">WebSocket</div>
+      <div class="output-desc">ws://host/ws/agents<br>Push every 15 min<br>Live regime updates<br>Auto-reconnect</div>
+    </div>
+    <div class="output-node" style="border-color: rgba(139,92,246,0.3);">
+      <div class="output-icon">💰</div>
+      <div class="output-name">x402 Micropay</div>
+      <div class="output-desc">$0.05 USDC per synthesis<br>Circle wallet<br>HTTP 402 → pay → access<br>No API key needed</div>
+    </div>
+  </div>
+
+  <!-- Connector: Outputs → Deploy -->
+  <div class="connector-row animate d7">
+    <div class="connector-arrow">
+      <div class="connector-line" style="background: var(--bg3);">
+        <div style="background: linear-gradient(180deg, var(--green), transparent);"></div>
+      </div>
+      <div class="connector-label" style="color: var(--green); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05);">
+        docker-compose up → live in 60 seconds
+      </div>
+      <div class="connector-chevron" style="color: var(--green);">▼</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ LAYER 6: DEPLOYMENT ═══ -->
+  <div class="section-title animate d7">Layer 6 · Deployment</div>
+
+  <div class="deploy-flow animate d7">
+    <div class="node deploy-node">
+      <div class="node-label">Self-Hosted</div>
+      <div class="node-title">🐳 Docker Compose</div>
+      <div class="node-desc">2 containers (backend:8000 + frontend:3000). Volume mount for prompt persistence. Just needs FRED_API_KEY.</div>
+      <div class="node-tech">
+        <span>docker-compose.yml</span>
+        <span>prompt_data volume</span>
+      </div>
+    </div>
+    <div class="node deploy-node">
+      <div class="node-label">Cloud Deploy</div>
+      <div class="node-title">☁️ Morph Cloud</div>
+      <div class="node-desc">deploy_to_morph.py → creates VM, installs Docker, uploads project, exposes HTTP. Snapshot restore &lt;250ms.</div>
+      <div class="node-tech">
+        <span>2 vCPU</span>
+        <span>4GB RAM</span>
+        <span>snapshot save</span>
+      </div>
+    </div>
+    <div class="node deploy-node">
+      <div class="node-label">Distribution</div>
+      <div class="node-title">🔧 OpenClaw Skill</div>
+      <div class="node-desc">SKILL.md with 100+ FRED catalog. Meta-agent factory: describe a domain → get a deployed agent.</div>
+      <div class="node-tech">
+        <span>YAML spec</span>
+        <span>generate_agent.py</span>
+        <span>clawhub publish</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ LEGEND ═══ -->
+  <div class="legend animate d8">
+    <div class="legend-item">
+      <div class="legend-dot" style="background: var(--cyan);"></div>
+      Data Flow
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: var(--blue);"></div>
+      Processing
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: var(--violet);"></div>
+      AI Synthesis
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: var(--green);"></div>
+      Human Curation
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: var(--amber);"></div>
+      Output
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: var(--red);"></div>
+      Alerts
+    </div>
+  </div>
+
+  <div class="watermark">
+    AdaBoost AI · Macro Intelligence Platform · Architecture v3.0
+  </div>
+
+</div>
+
+<script>
+// Intersection Observer for scroll-triggered animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
