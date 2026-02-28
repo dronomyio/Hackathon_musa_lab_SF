@@ -22,6 +22,23 @@ Claude Opus 4.6, Neo4j (causal ontology, 78 nodes, 120 relationships), FastAPI, 
 
 8 specialist agents continuously analyze Federal Reserve economic data and Claude Opus 4.6 fuses their signals into actionable intelligence. A Neo4j knowledge graph encodes causal relationships — not just that M2 correlates with BTC (ρ=0.94, 90-day lag), but the transmission mechanism: Fed policy → yield curve → credit spreads → DeFi outflows. When thresholds fire (VIX>30, M2 YoY>4%), the ontology traces which downstream channels activate and injects causal reasoning into the synthesis.
 
+# Webpage
+<img width="1321" height="807" alt="Screenshot 2026-02-27 at 4 16 42 PM" src="https://github.com/user-attachments/assets/59e03326-cac3-4147-8eae-8da157d50ab7" />
+<img width="1323" height="809" alt="Screenshot 2026-02-27 at 4 16 54 PM" src="https://github.com/user-attachments/assets/7a1d4eed-a49f-4930-bfec-4dca6cbefac0" />
+<img width="1321" height="723" alt="Screenshot 2026-02-27 at 4 17 06 PM" src="https://github.com/user-attachments/assets/f8428c3d-f740-479c-87ee-14a41781bc38" />
+
+<img width="1321" height="385" alt="Screenshot 2026-02-27 at 4 17 19 PM" src="https://github.com/user-attachments/assets/0620139f-cfb4-4005-b37a-b41925061751" />
+<img width="1324" height="587" alt="Screenshot 2026-02-27 at 4 17 31 PM" src="https://github.com/user-attachments/assets/e38be527-31b9-4dec-9099-ac2c783633d9" />
+<img width="1321" height="448" alt="Screenshot 2026-02-27 at 4 17 41 PM" src="https://github.com/user-attachments/assets/917b43df-811e-4e99-b6e1-032e5da09df2" />
+
+<img width="1317" height="474" alt="Screenshot 2026-02-27 at 4 17 52 PM" src="https://github.com/user-attachments/assets/023053b0-b931-4639-ad0d-b8d02165f745" />
+
+<img width="1322" height="591" alt="Screenshot 2026-02-27 at 4 18 00 PM" src="https://github.com/user-attachments/assets/ba4b2b32-6b5d-458d-a611-ecc9e2109e1f" />
+
+# Ontology results
+
+<img width="973" height="616" alt="Screenshot 2026-02-27 at 4 18 24 PM" src="https://github.com/user-attachments/assets/ee5529a3-2277-4e6d-be93-ebaf818025a5" />
+
 ## Architecture
 
 ```
